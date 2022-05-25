@@ -2,7 +2,7 @@ const { model, Schema } = require("mongoose");
 
 const catShema = new Schema(
   {
-    upvote: Number,
+    upvote: { type: Number, default: 0 },
     idCat: String,
   },
   { timestamps: true }
@@ -10,4 +10,4 @@ const catShema = new Schema(
 
 const catModel = model("cats", catShema);
 
-export default catModel;
+module.exports = catModel;

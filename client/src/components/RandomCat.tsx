@@ -7,8 +7,19 @@ const RandomCat: FC<{ cat: Cat; side: string }> = ({ cat, side }) => {
   useEffect(() => {
     const x = async () => {
       try {
-        const data = fetch(`${process.env.REACT_BACKEND_URL}/cat/${cat.id}`);
-        console.log(data);
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/cat/${cat.id}`
+        );
+        const data = await res.json();
+        if (data.found === false) {
+          await fetch(`${import.meta.env.VITE_BACKEND_URL}/cat`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json;charset=utf-8",
+            },
+            body: JSON.stringify(cat),
+          });
+        }
       } catch (e) {
         console.log(e);
       }

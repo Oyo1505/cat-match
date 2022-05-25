@@ -27,7 +27,8 @@ app.use(cors(corsOptions));
 //------
 // ROUTESdd
 // ----
-
+const catRouter = require("./routes/catRouter");
+app.use("/", catRouter);
 // catch 404 and forward to error handler
 app.use("/api/*", (req, res, next) => {
   const error = new Error("Ressource not found.");
