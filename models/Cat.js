@@ -2,6 +2,7 @@ const { model, Schema } = require("mongoose");
 
 const catShema = new Schema(
   {
+    url: String,
     upvote: { type: Number, default: 0 },
     idCat: String,
   },

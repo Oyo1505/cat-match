@@ -12,6 +12,7 @@ const RandomCat: FC<{ cat: Cat; side: string }> = ({ cat, side }) => {
         );
         const data = await res.json();
         if (data.found === false) {
+          console.log("dd");
           await fetch(`${import.meta.env.VITE_BACKEND_URL}/cat`, {
             method: "POST",
             headers: {
@@ -26,10 +27,12 @@ const RandomCat: FC<{ cat: Cat; side: string }> = ({ cat, side }) => {
     };
     x();
   }, []);
+  if (!cat) return <p>Nocat</p>;
   return (
     <>
       <ImageCat image={cat.url} />
       <ButtonVote id={cat.id} side={side} />
+      {cat.id}
     </>
   );
 };

@@ -1,9 +1,10 @@
 import { createContext, useEffect, useState } from "react";
+import { Cat } from "../interfaces";
 
 export type ContextProps = {
-  cats: object[];
-  catLeft: object;
-  catRight: object;
+  cats: Cat[];
+  catLeft: Cat;
+  catRight: Cat;
   changeCatImage: (side: string) => void;
 };
 
@@ -12,15 +13,18 @@ interface props {
   children: JSX.Element | JSX.Element[];
 }
 const StoreProviderWrapper = ({ children }: props) => {
-  const [cats, setCats] = useState<object[]>([]);
-  const [catLeft, setCatLeft] = useState<object>({ id: "", url: "" });
-  const [catRight, setRight] = useState<object>({ id: "", url: "" });
+  const [cats, setCats] = useState<Cat[]>([]);
+  const [catLeft, setCatLeft] = useState<Cat>({ id: "", url: "" });
+  const [catRight, setRight] = useState<Cat>({ id: "", url: "" });
   useEffect(() => {
     const x = async () => {
       try {
         const res = await fetch("https://latelier.co/data/cats.json");
         const data = await res.json();
         setCats(data.images);
+        if (cats) {
+          setRandomCat();
+        }
       } catch (e) {
         console.error(e);
       }
@@ -28,20 +32,55 @@ const StoreProviderWrapper = ({ children }: props) => {
     x();
   }, []);
   useEffect(() => {
-    if (cats.length > 0) {
-      setCatLeft(cats[Math.floor(Math.random() * cats.length - 1)]);
-      setRight(cats[Math.floor(Math.random() * cats.length - 1)]);
-    }
+    setRandomCat();
   }, [cats]);
-
-  const changeCatImage = (side: string) => {
-    if (side === "left") {
-      setCatLeft(cats[Math.floor(Math.random() * cats.length - 1)]);
-    } else {
-      setRight(cats[Math.floor(Math.random() * cats.length - 1)]);
+  const setRandomCat = () => {
+    let catsRandom = [
+      cats[Math.floor(Math.random() * cats.length)],
+      cats[Math.floor(Math.random() * cats.length)],
+    ];
+    if (cats.length > 0 && catsRandom[0] === catsRandom[1] && catsRandom[0]) {
+      setRandomCat();
+    }
+    setCatLeft(catsRandom[0]);
+    setRight(catsRandom[1]);
+    sendCatToDb(catsRandom[0]);
+    sendCatToDb(catsRandom[1]);
+  };
+  const sendCatToDb = async (cat: Cat) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/cat/${cat?.id}`
+      );
+      const data = await res.json();
+      if (data.found === false) {
+        await fetch(`${import.meta.env.VITE_BACKEND_URL}/cat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify(cat),
+        });
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
-  console.log(catLeft, catRight);
+
+  const changeCatImage = (side: string) => {
+    let catRandom;
+    if (side === "left") {
+      catRandom = cats[Math.floor(Math.random() * cats.length)];
+      console.log(catRandom);
+      setCatLeft(catRandom);
+      sendCatToDb(catRandom);
+    } else {
+      catRandom = cats[Math.floor(Math.random() * cats.length)];
+      setRight(catRandom);
+      sendCatToDb(catRandom);
+    }
+  };
+
   return (
     <StoreContext.Provider
       value={{
